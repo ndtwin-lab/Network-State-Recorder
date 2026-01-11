@@ -1,0 +1,14 @@
+---
+# From nornir
+inventory:
+  plugin: SimpleInventory
+  options:
+    host_file: "./setting/recorder_setting.yaml"
+
+runner:
+  plugin: threaded
+  options:
+    num_workers: 1
+
+logging:
+  enabled: false
