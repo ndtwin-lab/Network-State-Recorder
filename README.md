@@ -1,17 +1,14 @@
-# Network State Recorder (NSR)
+# Network State Recorder － User Manual
 
 Network State Recorder (NSR) is a tool that periodically fetches network state data from NDTwin and stores it in JSON files, which are then compressed into ZIP archives for efficient storage. The recorded data can be used for the Visualizer and Web-GUI to replay network states over time.
 
 ## Table of Contents
 
 - [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Output Files](#output-files)
 - [Troubleshooting](#troubleshooting)
-- [License](#license)
 
 ## Features
 
@@ -20,53 +17,6 @@ Network State Recorder (NSR) is a tool that periodically fetches network state d
 - **Multi-threaded Architecture**: Concurrent data fetching, writing, and compression for optimal performance
 - **Configurable Logging**: Daily log rotation with customizable log levels
 - **Graceful Shutdown**: Properly handles SIGINT/SIGTERM signals for clean termination
-
-## Requirements
-
-- **Python**: 3.8 or higher
-- **NDTwin Server**: Running and accessible
-- **Python Dependencies**:
-  - `nornir` - Network automation framework
-  - `loguru` - Logging library
-  - `orjson` - Fast JSON library
-  - `requests` - HTTP library
-
-## Installation
-
-### Step 1: Clone the Repository
-
-```bash
-git clone https://github.com/AlenChen0216/Network-State-Recorder.git
-cd Network-State-Recorder
-```
-
-### Step 2: Install Python Dependencies
-
-```bash
-pip install nornir loguru orjson requests
-```
-
-Or install using pip with requirements (create a `requirements.txt` if needed):
-
-```bash
-pip install nornir loguru orjson requests
-```
-
-### Step 3: Make Scripts Executable
-
-```bash
-chmod +x start_NSR.sh close_NSR.sh
-```
-
-### Step 4: Verify Installation
-
-Ensure NDTwin server is running, then test the configuration:
-
-```bash
-python3 NSR.py
-```
-
-Press `Ctrl+C` to stop if running successfully.
 
 ## Configuration
 
@@ -204,14 +154,29 @@ YYYY_MM_DD_HH-MM-SS_<datatype>_json.zip
 Each JSON file contains newline-delimited JSON records with the following structure:
 
 ```json
-{"timestamp": 1704067200000, "data": {...}}
-{"timestamp": 1704067205000, "data": {...}}
+{"timestamp": 1704067200000, ...}
+{"timestamp": 1704067205000, ...}
+```
+
+If the JSON file is `flowinfo` type, then the JSON formate is as below:
+
+```json
+{"timestamp": 1704067200000, "flowinfo":{[...]}}
+```
+
+If the JSON file is `flowinfo` type, then the JSON formate is as below:
+
+```json
+{"timestamp": 1704067200000, "edges":{[...]}, "nodes":[{...}]}
 ```
 
 - `timestamp`: Unix timestamp in milliseconds when data was fetched
-- `data`: The actual network state data from NDTwin
+- `flowinfo`: A specify key to the original NDTwin API response.
+- `edges` & `nodes`: The original NDTwin API response.
 
 ### Logs Location
+
+**Notice: The log of NSR is immediately written in the `logs` folder. Thus you will not see any log information in you're terminal**
 
 Log files are stored in the `./logs/` directory with daily rotation:
 ```

@@ -56,6 +56,9 @@ ZIP_PATH = queue.Queue()
 
 STOP_EVENT = threading.Event()
 
+FLOW_FINAL_EVENT = threading.Event()
+GRAPH_FINAL_EVENT = threading.Event()
+
 def zipper(file_path:str):
     """
     Compress a JSON file into a ZIP archive and remove the original file.
@@ -80,8 +83,6 @@ def zip_json_files():
     while not STOP_EVENT.is_set():
         paths = set()
         # wait for files to zip
-        while ZIP_PATH.empty() and not STOP_EVENT.is_set():
-            time.sleep(REQ_INTERVAL)
         
         while not ZIP_PATH.empty():
             file_path = ZIP_PATH.get(timeout=REQ_INTERVAL)
@@ -90,6 +91,7 @@ def zip_json_files():
             ZIP_PATH.task_done()
         
         if len(paths) == 0:
+            time.sleep(REQ_INTERVAL)
             continue
 
         with ProcessPoolExecutor(max_workers=2) as executor:
@@ -105,10 +107,19 @@ def zip_json_files():
         logger.success(f"Files: {paths} zipped successfully.")
 
     logger.info("Zipping last files... ")
+    while not FLOW_FINAL_EVENT.is_set() or not GRAPH_FINAL_EVENT.is_set():
+        logger.debug("Waiting for final files to be ready for zipping...")
+        time.sleep(REQ_INTERVAL)
+    logger.debug("All files are ready fot Zipping... ")
+    
+    paths = set()
     while not ZIP_PATH.empty():
         file_path = ZIP_PATH.get(timeout=REQ_INTERVAL)
-        zipper(file_path)
+        paths.add(file_path)
         ZIP_PATH.task_done()
+
+    for path in paths:
+        zipper(path)
 
     logger.info("Zipping Stopped.")
 
@@ -135,7 +146,6 @@ def write_data(queue_name):
                     item = QUEUES[queue_name].get(timeout = 0.1)
                     logger.debug(f"Writing item with timestamp {item['timestamp']} to {file_name}...")
                     logger.trace(f"Item content: {item}")
-                    
                     byte_item = orjson.dumps(item)
                     f.write(byte_item)
                     f.write(b"\n")
@@ -146,7 +156,15 @@ def write_data(queue_name):
             logger.info(f"Starting to zip stored JSON files : {file_name}...")
 
     logger.info("Zipping remaining data to file before stopping...")
-    ZIP_PATH.put(file_name)
+    if file_name != "":
+        ZIP_PATH.put(file_name)
+
+    # make sure the last file can be zipped.
+    if queue_name == "flowinfo":
+        FLOW_FINAL_EVENT.set()
+    elif queue_name == "graphinfo":
+        GRAPH_FINAL_EVENT.set()
+
     logger.info(f"Stopped data writing from {queue_name} queue...")
 
 
@@ -187,12 +205,18 @@ def request_data(url,queue_name, params=None):
             if response.status_code == 200:
                 # add received data to queue with timestamp in ms
                 current = int(datetime.now().timestamp()*1000)
-                data = {"timestamp": current, "data": response.json()}
-                if not data['data']:
+                data = {"timestamp": current}
+                if queue_name == "flowinfo":
+                    data['flowinfo'] = response.json()
+                elif queue_name == "graphinfo":
+                    data = {**data, **response.json()}
+                if not response.json():
                     logger.warning(f"No new data from {url}.")
 
+                logger.trace(f"Received {data} from {url}.")
+
                 QUEUES[queue_name].put(data)
-                    # print(f"Received {len(data['data'])} items from {url} and added to {queue_name} queue. timestamp: {current}")
+
             else:
                 response.raise_for_status()
 
