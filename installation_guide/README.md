@@ -41,3 +41,4 @@ python3 NSR.py
 Press `Ctrl+C` to stop if running successfully.
 
 **Notice: The log of NSR is immediately written in the `logs` folder. Thus you will not see any log information in you're terminal**
+

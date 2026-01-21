@@ -1,6 +1,7 @@
 # Network State Recorder － User Manual
 
 Network State Recorder (NSR) is a tool that periodically fetches network state data from NDTwin and stores it in JSON files, which are then compressed into ZIP archives for efficient storage. The recorded data can be used for the Visualizer and Web-GUI to replay network states over time.
+For installation, you can follow this [link](./installation_guide/README.md)
 
 ## Table of Contents
 
