@@ -266,16 +266,16 @@ def start():
         # config
         if config.inventory.hosts.get("Recorder") is not None:
             logger_config(level=config.inventory.hosts["Recorder"].data.get("log_level","INFO"))
-            ndtwin_server = config.inventory.hosts["Recorder"].data.get("ndtwin_server","http://127.0.0.1:8000")
-            FLOWINFO_URL = ndtwin_server + FLOWINFO_URL
-            GRAPHINFO_URL = ndtwin_server + GRAPHINFO_URL
+            ndtwin_kernel = config.inventory.hosts["Recorder"].data.get("ndtwin_kernel","http://127.0.0.1:8000")
+            FLOWINFO_URL = ndtwin_kernel + FLOWINFO_URL
+            GRAPHINFO_URL = ndtwin_kernel + GRAPHINFO_URL
             REQ_INTERVAL = config.inventory.hosts["Recorder"].data.get("request_interval",1)
             STORAGE_INTERVAL = config.inventory.hosts["Recorder"].data.get("storage_interval",5) * 60
         else:
             logger.error("No Recorder setting found, exiting...")
             return
         
-        logger.info(f"Recorder settings: NDTwin server: {ndtwin_server}, Request interval: {REQ_INTERVAL} seconds, Storage interval: {int(STORAGE_INTERVAL/60)} minutes")
+        logger.info(f"Recorder settings: NDTwin server: {ndtwin_kernel}, Request interval: {REQ_INTERVAL} seconds, Storage interval: {int(STORAGE_INTERVAL/60)} minutes")
 
         if not ndtwin_alive():
             logger.error("NDTwin server is not reachable, exiting...")

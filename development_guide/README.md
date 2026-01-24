@@ -293,7 +293,7 @@ while not FLOW_FINAL_EVENT.is_set() or not GRAPH_FINAL_EVENT.is_set() or not NEW
 
 ```python
 # In start(), after reading config
-NEW_SOURCE_URL = ndtwin_server + NEW_SOURCE_URL
+NEW_SOURCE_URL = ndtwin_kernel + NEW_SOURCE_URL
 
 # Create the threads
 new_source_thread = threading.Thread(target=request_data, args=(NEW_SOURCE_URL, 'new_source'))
@@ -326,7 +326,7 @@ while not FLOW_FINAL_EVENT.is_set() or not GRAPH_FINAL_EVENT.is_set() or not POR
     ...
 
 # Step 6: In start()
-PORTSTAT_URL = ndtwin_server + PORTSTAT_URL
+PORTSTAT_URL = ndtwin_kernel + PORTSTAT_URL
 portstat_thread = threading.Thread(target=request_data, args=(PORTSTAT_URL, 'portstat'))
 portstat_write_thread = threading.Thread(target=write_data, args=('portstat',))
 THREADS.append(portstat_thread)

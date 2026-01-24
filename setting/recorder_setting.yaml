@@ -1,7 +1,7 @@
 ---
 Recorder:
   data:
-    ndtwin_server: "http://127.0.0.1:8000"
+    ndtwin_kernel: "http://127.0.0.1:8000"
     request_interval: 5 # in seconds, need to be integer and >= 1
     storage_interval: 2 # in minutes, need to be integer and >= 1
     log_level: "DEBUG"

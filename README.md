@@ -51,7 +51,7 @@ This file contains the NSR-specific configuration:
 ---
 Recorder:
   data:
-    ndtwin_server: "http://127.0.0.1:8000"
+    ndtwin_kernel: "http://127.0.0.1:8000"
     request_interval: 5    # Data fetch interval in seconds (integer, >= 1)
     storage_interval: 2    # File rotation interval in minutes (integer, >= 1)
     log_level: "DEBUG"     # Logging level: TRACE, DEBUG, INFO, WARNING, ERROR
@@ -61,7 +61,7 @@ Recorder:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `ndtwin_server` | string | `http://127.0.0.1:8000` | URL of the NDTwin server |
+| `ndtwin_kernel` | string | `http://127.0.0.1:8000` | URL of the NDTwin server |
 | `request_interval` | integer | `5` | How often to fetch data from NDTwin (seconds) |
 | `storage_interval` | integer | `2` | How often to rotate and compress JSON files (minutes) |
 | `log_level` | string | `DEBUG` | Minimum logging level to record |
@@ -194,7 +194,7 @@ logs/NSR_YYYY-MM-DD.log
 
 **Solutions**:
 - Verify NDTwin server is running
-- Check the `ndtwin_server` URL in `setting/recorder_setting.yaml`
+- Check the `ndtwin_kernel` URL in `setting/recorder_setting.yaml`
 - Ensure no firewall is blocking the connection
 - Test connectivity: `curl http://<your ip>/ndt/get_detected_flow_data`
 
