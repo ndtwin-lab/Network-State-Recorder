@@ -16,6 +16,7 @@ from concurrent.futures import ProcessPoolExecutor
 import zipfile
 import signal
 import argparse
+import sys
 
 FLOWINFO_URL = "/ndt/get_detected_flow_data"
 
@@ -226,10 +227,10 @@ def ndtwin_alive()->bool:
         else:
             return False
     except requests.RequestException as e:
-        print(f"Error checking NDTwin server status: {e}")
+        logger.error(f"Error checking NDTwin server status: {e}")
         return False
 
-def logger_config(level:str="DEBUG", real_time:bool=True):
+def logger_config(level:str="DEBUG", display_on_console:bool=True):
     """
     Configure the loguru logger with file rotation and formatting.
     
@@ -237,20 +238,30 @@ def logger_config(level:str="DEBUG", real_time:bool=True):
     
     Args:
         level (str): The minimum logging level to capture (e.g., 'DEBUG', 'INFO', 'WARNING'). Defaults to 'DEBUG'.
-        real_time (bool): Whether to enable real-time logging output. Defaults to True.
+        display_on_console (bool): Whether to enable real-time logging output. Defaults to True.
     """
     logger.remove(0)
-    logger.add(
-        sink = (sys.stdout if real_time else "logs/NSR_{time:YYYY-MM-DD}.log"),
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level} : {message}</level>",
-        colorize=True,
-        backtrace=True,
-        diagnose=True,
-        rotation= (None if real_time else "1 day"),
-        level = level
-    )
+    if display_on_console:
+        logger.add(
+            sys.stdout,
+            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level} : {message}</level>",
+            colorize=True,
+            backtrace=True,
+            diagnose=True,
+            level = level
+        )
+    else:
+        logger.add(
+            "logs/NSR_{time:YYYY-MM-DD}.log",
+            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level} : {message}</level>",
+            colorize=True,
+            backtrace=True,
+            diagnose=True,
+            rotation= "1 day",
+            level = level
+        )
 
-def start(real_time=True):
+def start():
     """
     Initialize and start the NSR (Network State Recorder) application.
     
@@ -262,12 +273,12 @@ def start(real_time=True):
     - Compressing stored JSON files into ZIP archives
     """
     global THREADS,FLOWINFO_URL,GRAPHINFO_URL,REQ_INTERVAL,STORAGE_INTERVAL
-
     config = InitNornir(config_file="NSR.yaml")
     try:
         # config
         if config.inventory.hosts.get("Recorder") is not None:
-            logger_config(level=config.inventory.hosts["Recorder"].data.get("log_level","INFO"), real_time=real_time)
+            display_on_console = config.inventory.hosts["Recorder"].data.get("display_on_console",True)
+            logger_config(level=config.inventory.hosts["Recorder"].data.get("log_level","INFO"), display_on_console=display_on_console)
             ndtwin_kernel = config.inventory.hosts["Recorder"].data.get("ndtwin_kernel","http://127.0.0.1:8000")
             FLOWINFO_URL = ndtwin_kernel + FLOWINFO_URL
             GRAPHINFO_URL = ndtwin_kernel + GRAPHINFO_URL
@@ -315,12 +326,8 @@ def start(real_time=True):
 
 
 if __name__ == '__main__':
-    pargs = argparse.ArgumentParser(description="Network State Recorder (NSR)")
-    pargs.add_argument('real-time', type=bool, default='True', help='Real-time monitoring or not')
-    args = pargs.parse_args()
-
     signal.signal(signal.SIGINT, lambda s, f: terminate())
     signal.signal(signal.SIGTERM, lambda s, f: terminate())
-    start(real_time=args.real_time)
+    start()
     while True:
         time.sleep(1)

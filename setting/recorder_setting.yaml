@@ -4,4 +4,6 @@ Recorder:
     ndtwin_kernel: "http://127.0.0.1:8000"
     request_interval: 5 # in seconds, need to be integer and >= 1
     storage_interval: 2 # in minutes, need to be integer and >= 1
+    # set to false to disable real-time logging output to console, otherwise true.
+    display_on_console: true
     log_level: "DEBUG"

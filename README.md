@@ -54,6 +54,7 @@ Recorder:
     ndtwin_kernel: "http://127.0.0.1:8000"
     request_interval: 5    # Data fetch interval in seconds (integer, >= 1)
     storage_interval: 2    # File rotation interval in minutes (integer, >= 1)
+    display_on_console: true  # Enable real-time logging output to console (true/false)
     log_level: "DEBUG"     # Logging level: TRACE, DEBUG, INFO, WARNING, ERROR
 ```
 
@@ -64,6 +65,7 @@ Recorder:
 | `ndtwin_kernel` | string | `http://127.0.0.1:8000` | URL of the NDTwin server |
 | `request_interval` | integer | `5` | How often to fetch data from NDTwin (seconds) |
 | `storage_interval` | integer | `2` | How often to rotate and compress JSON files (minutes) |
+| `display_on_console` | boolean | `true` | Enable real-time logging output to console. Set to `false` to log only to files in `logs/` directory |
 | `log_level` | string | `DEBUG` | Minimum logging level to record |
 
 #### Log Levels (from most to least verbose)
@@ -86,13 +88,15 @@ Recorder:
 
 This runs NSR in the background using `nohup`, allowing you to close the terminal while NSR continues running.
 
+**Notice: this script will change the value of `display_on_console` in config file to `false`**
+
 #### Option 2: Running Directly (Foreground)
 
 ```bash
 python3 network_state_recorder.py
 ```
 
-This runs NSR in the foreground. Useful for debugging and monitoring real-time logs.
+This runs NSR in the foreground. If you want to monitor the log in real-time, you need to **set the `display_on_console` to `true`**
 
 ### Stopping NSR
 
@@ -104,6 +108,9 @@ This runs NSR in the foreground. Useful for debugging and monitoring real-time l
 
 This script finds the NSR process and sends a graceful termination signal (SIGTERM).
 
+
+**Notice: this script will change the value of `display_on_console` in config file to `true`**
+
 #### Option 2: Manual Termination
 
 If running in foreground, press `Ctrl+C` to stop.
@@ -111,11 +118,8 @@ If running in foreground, press `Ctrl+C` to stop.
 If running in background:
 
 ```bash
-# Find the process ID
-pgrep -f network_state_recorder.py
-
 # Send termination signal
-kill -15 <PID>
+sudo kill -15 $(pgrep -f network_state_recorder.py)
 ```
 
 ### Checking NSR Status
@@ -176,8 +180,6 @@ If the JSON file is `flowinfo` type, then the JSON formate is as below:
 - `edges` & `nodes`: The original NDTwin API response.
 
 ### Logs Location
-
-**Notice: The log of NSR is immediately written in the `logs` folder. Thus you will not see any log information in you're terminal**
 
 Log files are stored in the `./logs/` directory with daily rotation:
 ```
@@ -241,7 +243,7 @@ sudo kill -15 $(pgrep -f network_state_recorder.py)
 
 ### Viewing Logs
 
-To monitor NSR activity in real-time:
+To monitor NSR activity which running in background in real-time:
 
 ```bash
 tail -f logs/NSR_$(date +%Y-%m-%d).log

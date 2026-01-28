@@ -501,6 +501,7 @@ Recorder:
   data:
     request_interval: 1
     storage_interval: 1  # 1 minute for quick testing
+    display_on_console: true  # Enable console output for debugging
 ```
 
 ### 3. Verify Graceful Shutdown

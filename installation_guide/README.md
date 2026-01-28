@@ -40,5 +40,3 @@ python3 network_state_recorder.py
 
 Press `Ctrl+C` to stop if running successfully.
 
-**Notice: The log of NSR is immediately written in the `logs` folder. Thus you will not see any log information in you're terminal**
-
